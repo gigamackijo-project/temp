@@ -5,7 +5,6 @@ const router = express.Router();
 const wishlistDAO = require('./../models/wishlistDAO'); // Adjust the path as needed
 
 
-// id로 위시리스트 검색
 router.get('/checkWishlist/:wishId', async (req, res, next) => {
   const params = req.params.wishId;
 
@@ -14,15 +13,12 @@ router.get('/checkWishlist/:wishId', async (req, res, next) => {
   });
 });
 
-
-// 위시 리스트
 router.get('/getWishlist', async (req, res, next) => {
   wishlistDAO.getWishlist((resp) => {
     res.json(resp);
   });
 });
 
-// Add a product to the wishlist
 router.post('/addWishlist', async (req, res, next) => {
   const data = req.body; 
 
@@ -31,7 +27,6 @@ router.post('/addWishlist', async (req, res, next) => {
   });
 });
 
-// Remove a product from the wishlist
 router.delete('/deleteWishlist/:wishId', async (req, res, next) => {
   const params = req.params.wishId;
 

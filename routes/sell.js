@@ -19,7 +19,6 @@ router.post('/createSellList', async (req, res) => {
 router.get('/getSellList', (req, res, next) => {
   const data = req.body
 
-  // 사용자의 판매 목록 조회
   sellDAO.getSellList(data.user_id, (resp) => {
     res.json(resp);
   });
@@ -28,7 +27,6 @@ router.get('/getSellList', (req, res, next) => {
 router.get('/getBuyList', (req, res, next) => {
   const data = req.body
 
-  // 사용자의 판매 목록 조회
   sellDAO.getBuyList(data.user_id, (resp) => {
     res.json(resp);
   });
