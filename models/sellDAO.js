@@ -15,12 +15,12 @@ const pool = mysql.createPool({
 if (pool) console.log(`database connected...`);
 
 const sql = {
-  createSellList: 'INSERT INTO sell(product_id, user_id, sell_date) VALUES (?, ?, ?)',
+  createSellList: 'INSERT INTO sell(product_id, user_id) VALUES (?, ?)',
   getSellList: `SELECT p.name, p.cost_price, p.sale_price, p.state, p.ex_date, p.barcode, p.like_count, p.sale, u.name as seller_name 
                 FROM sell s 
                 JOIN product p ON s.product_id = p.product_id 
                 JOIN user u ON s.user_id = u.user_id
-                WHERE s.user_id = ? AND p.state = '판매중' `,
+                WHERE s.user_id = ? `,
 
   getBuyList: `SELECT p.name, p.cost_price, p.sale_price, p.state, p.ex_date, p.barcode, p.like_count, p.sale, u.name as seller_name 
                FROM sell s 
@@ -28,23 +28,16 @@ const sql = {
                JOIN user u ON s.user_id = u.user_id
                WHERE s.user_id = ? AND p.state = '판매완료' `,
   deleteSell: 'DELETE FROM sell WHERE sell_id = ?',
-  updateList: `UPDATE product p
-               JOIN sell s 
-               ON s.product_id = p.product_id 
-               JOIN user u ON s.user_id = u.user_id
-               SET p.state = '판매완료',
-               s.sell_date=NOW()
-               WHERE s.user_id = ?`
 };
 
 const sellDAO = {
   createSellList: async (item, callback) => {
-    const { product_id, user_id, sell_date } = item;
+    const { product_id, user_id } = item;
     let conn = null;
     try {
       conn = await pool.getConnection();
 
-      const [resp] = await conn.query(sql.createSell, [product_id, user_id, sell_date]);
+      const [resp] = await conn.query(sql.createSellList, [product_id, user_id]);
 
       callback({ status: 200, message: 'OK', data: resp });
     } catch (error) {
@@ -85,11 +78,6 @@ const sellDAO = {
   },
 
   deleteSell: async (sell_id, callback) => {
-    if (!sell_id) {
-      callback({ status: 400, message: '유효하지 않은 판매 ID입니다.', data: null });
-      return;
-    }
-
     let conn = null;
     try {
       conn = await pool.getConnection();
@@ -99,23 +87,6 @@ const sellDAO = {
       callback({ status: 200, message: 'OK', data: resp });
     } catch (error) {
       callback({ status: 500, message: '판매 삭제 실패', error: error });
-    } finally {
-      if (conn !== null) conn.release();
-    }
-  },
-
-  updateList: async (user_id, callback) => {
-    let conn = null;
-    try {
-      conn = await pool.getConnection();
-
-      const [resp] = await conn.query(sql.updateList, [user_id]);
-      conn.commit();    
-
-      callback({ status: 200, message: 'OK', data: resp });
-    } catch (error) {
-      conn.rollback();
-      callback({ status: 500, message: '판매 목록 업데이트 실패', error });
     } finally {
       if (conn !== null) conn.release();
     }

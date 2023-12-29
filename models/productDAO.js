@@ -95,20 +95,14 @@ getProductList: async (product_id, callback) => {
   }
 },
 
-updateState: async (product_id, callback) => {
+updateState: async (item, callback) => {
   let conn = null;
   try {
-    conn = await pool.getConnection();
+      conn = await pool.getConnection();
+      conn.beginTransaction();
 
-    const [check] = await conn.query('SELECT * FROM product WHERE product_id = ?', [product_id]);
-
-    if (check.length === 0) {
-      callback({ status: 404, message: '상품이 존재하지 않습니다.', data: null });
-      return;
-    }
-
-    const [resp] = await conn.query(sql.updateState, [product_id]);
-    conn.commit();    
+      const [resp] = await conn.query(sql.updateState, [item.product_id]);
+      conn.commit();    
 
     callback({ status: 200, message: 'OK', data: resp });
   } catch (error) {
@@ -119,15 +113,18 @@ updateState: async (product_id, callback) => {
   }
 },
 
-likeCount: async (product_id, callback) => {
+likeCount: async (item, callback) => {
   let conn = null;
   try {
     conn = await pool.getConnection();
+    conn.beginTransaction();
 
-    const [resp] = await conn.query(sql.likeCount, [product_id]);
+    const [resp] = await conn.query(sql.likeCount, [item.product_id]);
+    conn.commit();
 
     callback({ status: 200, message: 'OK', data: resp });
   } catch (error) {
+    conn.rollback();
     callback({ status: 500, message: '좋아요 수 증가 실패', error });
   } finally {
     if (conn !== null) conn.release();
