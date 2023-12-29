@@ -40,4 +40,13 @@ router.delete('/deleteSell/:sell_id', async (req, res, next) => {
   });
 });
 
+router.put('/updateList', (req, res, next) => {
+  const data = req.body;
+
+  // 사용자의 판매 목록 업데이트
+  sellDAO.updateList(data.user_id, (resp) => {
+    res.json(resp);
+  });
+});
+
 module.exports = router;

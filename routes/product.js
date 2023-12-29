@@ -44,4 +44,12 @@ router.put('/updateState', async (req, res, next) => {
   });
 });
 
+router.put('/likeCount', async (req, res, next) => {
+  const data = req.body;
+
+  productDAO.likeCount(data, (resp) => {
+    res.json(resp);
+  });
+});
+
 module.exports = router;

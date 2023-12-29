@@ -18,7 +18,8 @@ const sql = {
   addProduct: 'INSERT INTO product(name, cost_price, sale_price, ex_date, barcode, info, user_id) VALUES(?, ?, ?, ?, ?, ?, ?)',
   getProductList: 'SELECT * FROM product ORDER BY created_at DESC LIMIT ?, ?',
   deleteProduct: 'DELETE FROM product WHERE product_id = ?',
-  updateState: `UPDATE product SET state = '판매완료' WHERE product_id = ?`
+  updateState: `UPDATE product SET state = '판매완료' WHERE product_id = ?`,
+  likeCount: `UPDATE product SET like_count = like_count + 1 WHERE product_id = ?`
 };
 
 const productDAO = {
@@ -118,6 +119,20 @@ updateState: async (product_id, callback) => {
   }
 },
 
+likeCount: async (product_id, callback) => {
+  let conn = null;
+  try {
+    conn = await pool.getConnection();
+
+    const [resp] = await conn.query(sql.likeCount, [product_id]);
+
+    callback({ status: 200, message: 'OK', data: resp });
+  } catch (error) {
+    callback({ status: 500, message: '좋아요 수 증가 실패', error });
+  } finally {
+    if (conn !== null) conn.release();
+  }
+},
 
 };
 
