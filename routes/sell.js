@@ -5,15 +5,12 @@ const router = express.Router();
 
 const sellDAO = require('./../models/sellDAO');
 
-router.post('/createSellList', async (req, res) => {
-  try {
-    const { product_id, user_id, sell_date } = req.body;
-    const resp = await sellDAO.createSell(product_id, user_id, sell_date);
+router.post('/createSellList', (req, res, next) => {
+  const data = req.body
+
+  sellDAO.createSellList(data, (resp) => {
     res.json(resp);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: 500, message: 'Internal Server Error' });
-  }
+  });
 });
 
 router.get('/getSellList', (req, res, next) => {
@@ -40,13 +37,5 @@ router.delete('/deleteSell/:sell_id', async (req, res, next) => {
   });
 });
 
-router.put('/updateList', (req, res, next) => {
-  const data = req.body;
-
-  // 사용자의 판매 목록 업데이트
-  sellDAO.updateList(data.user_id, (resp) => {
-    res.json(resp);
-  });
-});
 
 module.exports = router;
